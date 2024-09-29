@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Календарь</title>
 </head>
+
 <body>
-    <form id="dateForm">
-        <label for="date">Выберите датуы:</label>
-        <input type="date" id="date" required />
-        <button type="submit">Отправить</button>
-    </form>
+    <input type="date" id="start_date" min="<?php echo date('Y-m-d'); ?>">
+    <input type="date" id="end_date" min="<?php echo date('Y-m-d', strtotime('+2 days')); ?>">
 
     <script src="sc.js"></script>
 </body>
+
 </html>

@@ -1,21 +1,28 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const dateInput = document.getElementById('date');
-    
-    // Устанавливаем минимальную дату на сегодня
-    const today = new Date();
-    const formattedDate = today.toISOString().split('T')[0];
-    dateInput.setAttribute('min', formattedDate);
-    
-    const form = document.getElementById('dateForm');
+document.addEventListener("DOMContentLoaded", function() {
+    // Устанавливаем сегодняшнюю дату как значение для start_date
+    var today = new Date();
+    var todayString = today.toISOString().split('T')[0];
+    document.getElementById("start_date").value = todayString;
+    document.getElementById("start_date").min = todayString;
 
-    form.addEventListener('submit', function(e) {
-        const selectedDate = new Date(dateInput.value);
-        today.setHours(0, 0, 0, 0); // Устанавливаем время на 00:00:00
+    // Устанавливаем минимальную дату для end_date на 2 дня позже
+    var twoDaysLater = new Date();
+    twoDaysLater.setDate(today.getDate() + 2);
+    var twoDaysLaterString = twoDaysLater.toISOString().split('T')[0];
+    document.getElementById("end_date").min = twoDaysLaterString;
+});
 
-        if (selectedDate < today) {
-            e.preventDefault(); // Отменяем отправку формы
-            alert('Выберите дату сегодня или в будущем.');
-            dateInput.value = ''; // Очищаем поле ввода
-        }
-    });
+document.getElementById("start_date").addEventListener("change", function () {
+    var startDate = new Date(this.value);
+    var twoDaysLater = new Date(startDate);
+    twoDaysLater.setDate(startDate.getDate() + 2);
+    
+    // Обновляем минимальную дату для end_date
+    var minEndDate = twoDaysLater.toISOString().split('T')[0];
+    document.getElementById("end_date").setAttribute('min', minEndDate);
+    
+    // Сбрасываем значение end_date, если выбрана новая start_date
+    document.getElementById("end_date").value = '';
+    
+    checkButtonState(); // Проверяем состояние кнопки
 });
