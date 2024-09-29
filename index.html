@@ -55,10 +55,12 @@
             var minEndDate = new Date(startDate);
             minEndDate.setDate(startDate.getDate() + 2);
 
-            // Проверяем, что выбранная дата возврата не меньше минимально допустимой
-            if (new Date(this.value) < minEndDate) {
-                alert("Дата возврата должна быть минимум на 2 дня позже даты начала.");
-                this.value = ''; // Сбрасываем значение
+            // Проверяем, что дата возврата выбрана и соответствует минимально допустимой
+            if (this.value) {
+                if (new Date(this.value) < minEndDate) {
+                    alert("Дата возврата должна быть минимум на 2 дня позже даты начала.");
+                    this.value = ''; // Сбрасываем значение
+                }
             }
 
             checkButtonState(); // Проверяем состояние кнопки
