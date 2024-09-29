@@ -10,9 +10,9 @@
 
     <!-- Ваши поля ввода -->
     <input type="date" id="start_date">
-    <input type="date" id="end_date">
-    <input type="time" id="start">
-    <input type="time" id="end">
+    <input type="date" id="end_date" disabled>
+    <input type="time" id="start" disabled>
+    <input type="time" id="end" disabled>
     <button id="submitButton" disabled>Отправить</button>
 
     <script>
@@ -86,6 +86,17 @@
                 var nextDay = new Date(startDate);
                 nextDay.setDate(startDate.getDate() + 2);
                 $('#end_date').attr('min', nextDay.toISOString().split('T')[0]);
+
+                // Проверка, если выбрана прошлая дата
+                if (startDate < new Date()) {
+                    $('#end_date').val(''); // Удаляем дату возврата
+                    $('#end_date').prop('disabled', true);
+                    $('#start').val(''); // Удаляем время начала
+                    $('#end').val(''); // Удаляем время окончания
+                } else {
+                    $('#end_date').prop('disabled', false);
+                }
+
                 checkButtonState(); // Проверяем состояние кнопки
             });
 
