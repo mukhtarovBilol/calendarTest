@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Выбор дат</title>
 </head>
+
 <body>
     <label for="start_date">Дата начала:</label>
     <input type="date" id="start_date">
@@ -15,58 +17,65 @@
     <button id="submitButton" disabled>Подтвердить</button>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var today = new Date();
-            var todayString = today.toISOString().split('T')[0];
-            document.getElementById("start_date").value = todayString;
-            document.getElementById("start_date").min = todayString;
+        // Устанавливаем сегодняшнюю дату как значение и минимальную для start_date
+        const today = new Date();
+        var todayString = today.toISOString().split('T')[0];
 
-            updateEndDateMin(today);
-        });
+        document.getElementById("start_date").min = todayString;
+        document.getElementById("start_date").value = todayString;
+
+        // Устанавливаем минимальную дату для end_date на 2 дня позже
+        updateEndDateMin(today);
 
         document.getElementById("start_date").addEventListener("change", function () {
-            var startDate = new Date(this.value);
-            if (startDate < new Date()) {
+            const startDate = new Date(this.value);
+            const today = new Date();
+
+
+            // Проверка на выбор прошлой даты
+            if (startDate < today) {
                 alert("Нельзя выбирать прошлые даты.");
-                this.value = ''; // Сбрасываем значение
+                this.value = todayString; // Возвращаем к сегодняшней
                 return;
             }
-            updateEndDateMin(startDate);
-            document.getElementById("end_date").value = ''; // Сбрасываем значение end_date
-            checkButtonState();
+
+            updateEndDateMin(startDate); // Обновляем минимальную дату возврата
+            document.getElementById("end_date").value = ''; // Сбрасываем end_date
+            checkButtonState(); // Проверяем состояние кнопки
         });
 
         function updateEndDateMin(startDate) {
-            var twoDaysLater = new Date(startDate);
+            const twoDaysLater = new Date(startDate);
             twoDaysLater.setDate(startDate.getDate() + 2);
-            var minEndDate = twoDaysLater.toISOString().split('T')[0];
-            document.getElementById("end_date").setAttribute('min', minEndDate);
+            const minEndDate = twoDaysLater.toISOString().split('T')[0];
+            document.getElementById("end_date").min = minEndDate;
         }
 
-        document.getElementById("end_date").addEventListener("change", function() {
-            var startDate = new Date(document.getElementById("start_date").value);
-            var minEndDate = new Date(startDate);
+        document.getElementById("end_date").addEventListener("change", function () {
+            const startDate = new Date(document.getElementById("start_date").value);
+            const minEndDate = new Date(startDate);
             minEndDate.setDate(startDate.getDate() + 2);
 
             // Проверяем, что дата возврата выбрана и соответствует минимально допустимой
             if (this.value) {
-                var selectedEndDate = new Date(this.value);
+                const selectedEndDate = new Date(this.value);
                 if (selectedEndDate < minEndDate) {
                     alert("Дата возврата должна быть минимум на 2 дня позже даты начала.");
                     this.value = ''; // Сбрасываем значение
-                    return; // Позволяет пользователю снова выбрать дату
                 }
             }
 
-            checkButtonState();
+            checkButtonState(); // Проверяем состояние кнопки
         });
 
         function checkButtonState() {
-            var startDate = document.getElementById("start_date").value;
-            var endDate = document.getElementById("end_date").value;
-            var isButtonEnabled = startDate && endDate;
-            document.getElementById("submitButton").disabled = !isButtonEnabled;
+            const startDate = document.getElementById("start_date").value;
+            const endDate = document.getElementById("end_date").value;
+
+            // Активируем кнопку только если обе даты выбраны
+            document.getElementById("submitButton").disabled = !(startDate && endDate);
         }
     </script>
 </body>
+
 </html>
