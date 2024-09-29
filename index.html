@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Выбор дат</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
-
 <body>
     <label for="start_date">Дата начала:</label>
     <input type="date" id="start_date">
@@ -17,64 +16,55 @@
     <button id="submitButton" disabled>Подтвердить</button>
 
     <script>
-        // Устанавливаем сегодняшнюю дату как значение и минимальную для start_date
-        const today = new Date();
-        var todayString = today.toISOString().split('T')[0];
-
-        document.getElementById("start_date").min = todayString;
-        document.getElementById("start_date").value = todayString;
-
-        // Устанавливаем минимальную дату для end_date на 2 дня позже
-        updateEndDateMin(today);
-
-        document.getElementById("start_date").addEventListener("change", function () {
-            const startDate = new Date(this.value);
+        $(document).ready(function() {
+            // Устанавливаем сегодняшнюю дату как значение и минимальную для start_date
             const today = new Date();
+            const todayString = today.toISOString().split('T')[0];
+            $('#start_date').attr('min', todayString).val(todayString);
 
+            // Устанавливаем минимальную дату для end_date на 2 дня позже
+            updateEndDateMin(today);
 
-            // Проверка на выбор прошлой даты
-            if (startDate < today) {
-                alert("Нельзя выбирать прошлые даты.");
-                this.value = todayString; // Возвращаем к сегодняшней
-            }
-
-            updateEndDateMin(startDate); // Обновляем минимальную дату возврата
-            document.getElementById("end_date").value = ''; // Сбрасываем end_date
-            checkButtonState(); // Проверяем состояние кнопки
-        });
-
-        function updateEndDateMin(startDate) {
-            const twoDaysLater = new Date(startDate);
-            twoDaysLater.setDate(startDate.getDate() + 2);
-            const minEndDate = twoDaysLater.toISOString().split('T')[0];
-            document.getElementById("end_date").min = minEndDate;
-        }
-
-        document.getElementById("end_date").addEventListener("change", function () {
-            const startDate = new Date(document.getElementById("start_date").value);
-            const minEndDate = new Date(startDate);
-            minEndDate.setDate(startDate.getDate() + 2);
-
-            // Проверяем, что дата возврата выбрана и соответствует минимально допустимой
-            if (this.value) {
-                const selectedEndDate = new Date(this.value);
-                if (selectedEndDate < minEndDate) {
-                    alert("Дата возврата должна быть минимум на 2 дня позже даты начала.");
-                    this.value = ''; // Сбрасываем значение
+            $('#start_date').change(function() {
+                const startDate = new Date($(this).val());
+                if (startDate < today) {
+                    alert("Нельзя выбирать прошлые даты.");
+                    $(this).val(todayString); // Возвращаем к сегодняшней
+                    return;
                 }
+                updateEndDateMin(startDate);
+                $('#end_date').val(''); // Сбрасываем end_date
+                checkButtonState();
+            });
+
+            $('#end_date').change(function() {
+                const startDate = new Date($('#start_date').val());
+                const minEndDate = new Date(startDate);
+                minEndDate.setDate(startDate.getDate() + 2);
+
+                if ($(this).val()) {
+                    const selectedEndDate = new Date($(this).val());
+                    if (selectedEndDate < minEndDate) {
+                        alert("Дата возврата должна быть минимум на 2 дня позже даты начала.");
+                        $(this).val(''); // Сбрасываем значение
+                    }
+                }
+                checkButtonState();
+            });
+
+            function updateEndDateMin(startDate) {
+                const twoDaysLater = new Date(startDate);
+                twoDaysLater.setDate(startDate.getDate() + 2);
+                const minEndDate = twoDaysLater.toISOString().split('T')[0];
+                $('#end_date').attr('min', minEndDate);
             }
 
-            checkButtonState(); // Проверяем состояние кнопки
+            function checkButtonState() {
+                const startDate = $('#start_date').val();
+                const endDate = $('#end_date').val();
+                $('#submitButton').prop('disabled', !(startDate && endDate));
+            }
         });
-
-        function checkButtonState() {
-            const startDate = document.getElementById("start_date").value;
-            const endDate = document.getElementById("end_date").value;
-
-            // Активируем кнопку только если обе даты выбраны
-            document.getElementById("submitButton").disabled = !(startDate && endDate);
-        }
     </script>
 </body>
-
 </html>
