@@ -3,66 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Выбор дат</title>
+    <title>Выбор дат аренды</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        input[type="date"] {
+            margin: 10px 0;
+        }
+        .warning {
+            color: red;
+            display: none;
+        }
+        button:disabled {
+            background-color: lightgray;
+        }
+    </style>
 </head>
 <body>
-    <label for="start_date">Дата начала:</label>
-    <input type="date" id="start_date">
+    <h1>Выбор дат аренды</h1>
+    <label for="startDate">Дата начала:</label>
+    <input type="date" id="startDate">
+    <div id="startWarning" class="warning">Выберите дату начиная с сегодняшнего дня.</div>
 
-    <label for="end_date">Дата возврата:</label>
-    <input type="date" id="end_date">
+    <label for="endDate">Дата возврата:</label>
+    <input type="date" id="endDate">
+    <div id="endWarning" class="warning">Дата возврата должна быть минимум на 2 дня позже даты начала.</div>
 
-    <button id="submitButton" disabled>Подтвердить</button>
+    <button id="confirmButton" disabled>Подтвердить</button>
 
     <script>
         $(document).ready(function() {
-            // Устанавливаем сегодняшнюю дату как значение и минимальную для start_date
-            const today = new Date();
-            const todayString = today.toISOString().split('T')[0];
-            $('#start_date').attr('min', todayString).val(todayString);
+            const today = new Date().toISOString().split('T')[0];
 
-            // Устанавливаем минимальную дату для end_date на 2 дня позже
-            updateEndDateMin(today);
+            $('#startDate').attr('min', today);
+            $('#endDate').attr('min', today); // Ограничение на возврат
 
-            $('#start_date').change(function() {
-                const startDate = new Date($(this).val());
+            $('#startDate').on('change', function() {
+                const startDate = $(this).val();
                 if (startDate < today) {
-                    alert("Нельзя выбирать прошлые даты.");
-                    $(this).val(todayString); // Возвращаем к сегодняшней
-                    return;
+                    $('#startWarning').show();
+                    $(this).val('');
+                } else {
+                    $('#startWarning').hide();
+                    // Обновляем дату возврата
+                    $('#endDate').attr('min', new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 2)).toISOString().split('T')[0]);
                 }
-                updateEndDateMin(startDate);
-                $('#end_date').val(''); // Сбрасываем end_date
-                checkButtonState();
+                validateDates();
             });
 
-            $('#end_date').change(function() {
-                const startDate = new Date($('#start_date').val());
-                const minEndDate = new Date(startDate);
-                minEndDate.setDate(startDate.getDate() + 2);
+            $('#endDate').on('change', function() {
+                const startDate = $('#startDate').val();
+                const endDate = $(this).val();
 
-                if ($(this).val()) {
-                    const selectedEndDate = new Date($(this).val());
-                    if (selectedEndDate < minEndDate) {
-                        alert("Дата возврата должна быть минимум на 2 дня позже даты начала.");
-                        $(this).val(''); // Сбрасываем значение
+                if (startDate && endDate) {
+                    const start = new Date(startDate);
+                    const end = new Date(endDate);
+                    const minEndDate = new Date(start);
+                    minEndDate.setDate(start.getDate() + 2);
+
+                    if (end < minEndDate) {
+                        $('#endWarning').show();
+                        $(this).val('');
+                    } else {
+                        $('#endWarning').hide();
                     }
                 }
-                checkButtonState();
+                validateDates();
             });
 
-            function updateEndDateMin(startDate) {
-                const twoDaysLater = new Date(startDate);
-                twoDaysLater.setDate(startDate.getDate() + 2);
-                const minEndDate = twoDaysLater.toISOString().split('T')[0];
-                $('#end_date').attr('min', minEndDate);
-            }
-
-            function checkButtonState() {
-                const startDate = $('#start_date').val();
-                const endDate = $('#end_date').val();
-                $('#submitButton').prop('disabled', !(startDate && endDate));
+            function validateDates() {
+                const startDate = $('#startDate').val();
+                const endDate = $('#endDate').val();
+                $('#confirmButton').prop('disabled', !(startDate && endDate));
             }
         });
     </script>
