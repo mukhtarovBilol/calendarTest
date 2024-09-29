@@ -1,40 +1,17 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Выбор даты</title>
+    <title>Календарь</title>
 </head>
-
 <body>
-    <h1>Выберите датуййй2</h1>
-    <input type="date" id="datePicker" required>
+    <form id="dateForm">
+        <label for="date">Выберите дату:</label>
+        <input type="date" id="date" required />
+        <button type="submit">Отправить</button>
+    </form>
 
-    <script>
-        function setMinDate() {
-            const today = new Date();
-            const dd = String(today.getDate()).padStart(2, '0');
-            const mm = String(today.getMonth() + 1).padStart(2, '0'); // Январь — 0!
-            const yyyy = today.getFullYear();
-
-            const minDate = yyyy + '-' + mm + '-' + dd;
-            const datePicker = document.getElementById('datePicker');
-            datePicker.setAttribute('min', minDate);
-            datePicker.value = minDate; // Устанавливаем сегодняшнюю дату по умолчанию
-        }
-
-        // Установим минимальную дату при загрузке страницы
-        window.onload = setMinDate;
-
-        document.querySelector('form').onsubmit = function (event) {
-            const selectedDate = new Date(datePicker.value);
-            if (selectedDate < new Date()) {
-                alert('Пожалуйста, выберите будущую дату.');
-                event.preventDefault(); // Останавливаем отправку формы
-            }
-        };
-    </script>
+    <script src="sc.js"></script>
 </body>
-
 </html>
