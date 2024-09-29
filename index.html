@@ -16,36 +16,29 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Устанавливаем сегодняшнюю дату как значение и минимальную для start_date
             var today = new Date();
             var todayString = today.toISOString().split('T')[0];
             document.getElementById("start_date").value = todayString;
             document.getElementById("start_date").min = todayString;
 
-            // Устанавливаем минимальную дату для end_date на 2 дня позже
             updateEndDateMin(today);
         });
 
         document.getElementById("start_date").addEventListener("change", function () {
             var startDate = new Date(this.value);
-
-            // Проверка на выбор прошлой даты
             if (startDate < new Date()) {
                 alert("Нельзя выбирать прошлые даты.");
                 this.value = ''; // Сбрасываем значение
                 return;
             }
-
             updateEndDateMin(startDate);
             document.getElementById("end_date").value = ''; // Сбрасываем значение end_date
-            checkButtonState(); // Проверяем состояние кнопки
+            checkButtonState();
         });
 
         function updateEndDateMin(startDate) {
             var twoDaysLater = new Date(startDate);
             twoDaysLater.setDate(startDate.getDate() + 2);
-
-            // Обновляем минимальную дату для end_date
             var minEndDate = twoDaysLater.toISOString().split('T')[0];
             document.getElementById("end_date").setAttribute('min', minEndDate);
         }
@@ -57,21 +50,20 @@
 
             // Проверяем, что дата возврата выбрана и соответствует минимально допустимой
             if (this.value) {
-                if (new Date(this.value) < minEndDate) {
+                var selectedEndDate = new Date(this.value);
+                if (selectedEndDate < minEndDate) {
                     alert("Дата возврата должна быть минимум на 2 дня позже даты начала.");
                     this.value = ''; // Сбрасываем значение
-                    this.setAttribute('min', minEndDate); // Обновляем минимальную дату
-                    return; // Прерываем выполнение, чтобы избежать блокировки
+                    return; // Позволяет пользователю снова выбрать дату
                 }
             }
 
-            checkButtonState(); // Проверяем состояние кнопки
+            checkButtonState();
         });
 
         function checkButtonState() {
             var startDate = document.getElementById("start_date").value;
             var endDate = document.getElementById("end_date").value;
-
             var isButtonEnabled = startDate && endDate;
             document.getElementById("submitButton").disabled = !isButtonEnabled;
         }
