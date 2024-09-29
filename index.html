@@ -126,7 +126,17 @@
             });
 
             $('#end_date').on('change', function() {
-                $('#end').prop('disabled', false); // Активируем выбор времени возврата
+                var startDate = new Date($('#start_date').val());
+                var endDate = new Date($(this).val());
+
+                if (endDate < startDate) {
+                    $('#end_date').val(''); // Сбрасываем дату возврата
+                    $('#end_date').prop('disabled', true);
+                    $('#endDateError').text('Дата возврата должна быть позже даты получения.');
+                } else {
+                    $('#end').prop('disabled', false); // Активируем выбор времени возврата
+                }
+
                 checkButtonState();
             });
 
