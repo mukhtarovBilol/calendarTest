@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Выбор даты</title>
 </head>
+
 <body>
-    <h1>Выберите датуййй</h1>
+    <h1>Выберите датуййй2</h1>
     <input type="date" id="datePicker" required>
 
     <script>
@@ -24,6 +26,15 @@
 
         // Установим минимальную дату при загрузке страницы
         window.onload = setMinDate;
+
+        document.querySelector('form').onsubmit = function (event) {
+            const selectedDate = new Date(datePicker.value);
+            if (selectedDate < new Date()) {
+                alert('Пожалуйста, выберите будущую дату.');
+                event.preventDefault(); // Останавливаем отправку формы
+            }
+        };
     </script>
 </body>
+
 </html>
