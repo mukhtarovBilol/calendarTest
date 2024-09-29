@@ -5,36 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Аренда авто</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .error { color: red; }
+    </style>
 </head>
 <body>
 
-    <!-- Ваши поля ввода -->
-    <input type="date" id="start_date">
-    <input type="date" id="end_date" disabled>
-    <input type="time" id="start" disabled>
-    <input type="time" id="end" disabled>
+    <div>
+        <label for="start_date">Дата получения:</label>
+        <input type="date" id="start_date">
+        <span id="startDateError" class="error"></span>
+    </div>
+    
+    <div>
+        <label for="end_date">Дата возврата:</label>
+        <input type="date" id="end_date" disabled>
+        <span id="endDateError" class="error"></span>
+    </div>
+    
+    <div>
+        <label for="start">Время получения:</label>
+        <input type="time" id="start" disabled>
+    </div>
+    
+    <div>
+        <label for="end">Время возврата:</label>
+        <input type="time" id="end" disabled>
+    </div>
+    
     <button id="submitButton" disabled>Отправить</button>
 
     <script>
         $(document).ready(function() {
-            // Инициализация переменных
             var startInputHours = 0;
             var endInputHours = 0;
 
-            // Устанавливаем сегодняшнюю дату как минимальную для получения и возврата
             var today = new Date().toISOString().split('T')[0];
             $('#start_date').attr('min', today);
             $('#end_date').attr('min', today);
+
+            function resetErrors() {
+                $('#startDateError').text('');
+                $('#endDateError').text('');
+            }
 
             function calculate() {
                 var startDate = new Date($('#start_date').val());
                 var endDate = new Date($('#end_date').val());
 
-                // Количество дней аренды
                 var differenceInTime = endDate.getTime() - startDate.getTime();
-                var differenceInDays = Math.ceil(differenceInTime / (1000 * 3600 * 24)); // округляем вверх
+                var differenceInDays = Math.ceil(differenceInTime / (1000 * 3600 * 24));
 
-                // Учитываем, если время начала меньше времени окончания
                 if (startInputHours <= endInputHours) {
                     differenceInDays++;
                 }
@@ -43,6 +64,7 @@
             }
 
             function checkButtonState() {
+                resetErrors();
                 var startDate = $('#start_date').val();
                 var endDate = $('#end_date').val();
                 var startTime = $('#start').val();
@@ -50,15 +72,20 @@
 
                 var isButtonEnabled = startDate && endDate && startTime && endTime;
 
-                // Проверяем, что даты не в прошлом и дата окончания больше даты начала
                 if (isButtonEnabled) {
                     var today = new Date().setHours(0, 0, 0, 0);
                     var selectedStartDate = new Date(startDate + 'T' + startTime);
                     var selectedEndDate = new Date(endDate + 'T' + endTime);
 
-                    // Условие проверки
-                    if (selectedStartDate < today || selectedEndDate < today || selectedEndDate <= selectedStartDate) {
+                    if (selectedStartDate < today) {
                         isButtonEnabled = false;
+                        $('#startDateError').text('Выберите дату получения, которая не является прошлой.');
+                    } else if (selectedEndDate < today) {
+                        isButtonEnabled = false;
+                        $('#endDateError').text('Выберите дату возврата, которая не является прошлой.');
+                    } else if (selectedEndDate <= selectedStartDate) {
+                        isButtonEnabled = false;
+                        $('#endDateError').text('Дата возврата должна быть позже даты получения.');
                     }
                 }
 
@@ -66,22 +93,19 @@
             }
 
             $('#start').on('change', function() {
-                var startInput = $(this).val().split(':');
-                startInputHours = Number(startInput[0]) + 3; // Учитываем часовой пояс
-
-                $('#end_date').prop('disabled', false); // Активируем выбор даты возврата
+                startInputHours = Number($(this).val().split(':')[0]) + 3; // Учитываем часовой пояс
+                $('#end_date').prop('disabled', false);
                 checkButtonState();
             });
 
             $('#end').on('change', function() {
-                var endInput = $(this).val().split(':');
-                endInputHours = Number(endInput[0]);
-
+                endInputHours = Number($(this).val().split(':')[0]);
                 calculate();
                 checkButtonState();
             });
 
             $('#start_date').on('change', function() {
+                resetErrors();
                 var startDate = new Date($(this).val());
                 var nextDay = new Date(startDate);
                 nextDay.setDate(startDate.getDate() + 2);
@@ -93,24 +117,23 @@
                     $('#end_date').prop('disabled', true);
                     $('#start').val(''); // Удаляем время начала
                     $('#end').val(''); // Удаляем время окончания
+                    $('#startDateError').text('Дата получения не может быть в прошлом.');
                 } else {
-                    $('#end_date').prop('disabled', false);
+                    $('#end_date').prop('disabled', false); // Активируем выбор даты возврата
                 }
 
-                checkButtonState(); // Проверяем состояние кнопки
+                checkButtonState();
             });
 
             $('#end_date').on('change', function() {
                 $('#end').prop('disabled', false); // Активируем выбор времени возврата
-                checkButtonState(); // Проверяем состояние кнопки
+                checkButtonState();
             });
 
-            // Дополнительные проверки при вводе даты
             $('#start_date, #end_date').on('input', checkButtonState);
         });
 
         function calculateRentalCost(days) {
-            // Логика расчета стоимости аренды
             console.log("Количество дней аренды: " + days);
         }
     </script>
