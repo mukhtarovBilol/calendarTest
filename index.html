@@ -16,7 +16,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Устанавливаем сегодняшнюю дату как значение для start_date
+            // Устанавливаем сегодняшнюю дату как значение и минимальную для start_date
             var today = new Date();
             var todayString = today.toISOString().split('T')[0];
             document.getElementById("start_date").value = todayString;
@@ -28,6 +28,14 @@
 
         document.getElementById("start_date").addEventListener("change", function () {
             var startDate = new Date(this.value);
+
+            // Проверка на выбор прошлой даты
+            if (startDate < new Date()) {
+                alert("Нельзя выбирать прошлые даты.");
+                this.value = ''; // Сбрасываем значение
+                return;
+            }
+
             updateEndDateMin(startDate);
             document.getElementById("end_date").value = ''; // Сбрасываем значение end_date
             checkButtonState(); // Проверяем состояние кнопки
