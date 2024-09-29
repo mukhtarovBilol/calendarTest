@@ -3,83 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Выбор дат аренды</title>
+    <title>Аренда авто</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        input[type="date"] {
-            margin: 10px 0;
-        }
-        .warning {
-            color: red;
-            display: none;
-        }
-        button:disabled {
-            background-color: lightgray;
-        }
-    </style>
 </head>
 <body>
-    <h1>Выбор дат аренды</h1>
-    <label for="startDate">Дата начала:</label>
-    <input type="date" id="startDate">
-    <div id="startWarning" class="warning">Выберите дату начиная с сегодняшнего дня.</div>
 
-    <label for="endDate">Дата возврата:</label>
-    <input type="date" id="endDate">
-    <div id="endWarning" class="warning">Дата возврата должна быть минимум на 2 дня позже даты начала.</div>
-
-    <button id="confirmButton" disabled>Подтвердить</button>
+    <!-- Ваши поля ввода -->
+    <input type="date" id="start_date">
+    <input type="date" id="end_date">
+    <input type="time" id="start">
+    <input type="time" id="end">
+    <button id="submitButton" disabled>Отправить</button>
 
     <script>
         $(document).ready(function() {
-            const today = new Date().toISOString().split('T')[0];
+            // Инициализация переменных
+            var startInputHours = 0;
+            var endInputHours = 0;
 
-            $('#startDate').attr('min', today);
-            $('#endDate').attr('min', today); // Ограничение на возврат
+            // Устанавливаем сегодняшнюю дату как минимальную для получения и возврата
+            var today = new Date().toISOString().split('T')[0];
+            $('#start_date').attr('min', today);
+            $('#end_date').attr('min', today);
 
-            $('#startDate').on('change', function() {
-                const startDate = $(this).val();
-                if (startDate < today) {
-                    $('#startWarning').show();
-                    $(this).val('');
-                } else {
-                    $('#startWarning').hide();
-                    // Обновляем дату возврата
-                    $('#endDate').attr('min', new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 2)).toISOString().split('T')[0]);
+            function calculate() {
+                var startDate = new Date($('#start_date').val());
+                var endDate = new Date($('#end_date').val());
+
+                // Количество дней аренды
+                var differenceInTime = endDate.getTime() - startDate.getTime();
+                var differenceInDays = Math.ceil(differenceInTime / (1000 * 3600 * 24)); // округляем вверх
+
+                // Учитываем, если время начала меньше времени окончания
+                if (startInputHours <= endInputHours) {
+                    differenceInDays++;
                 }
-                validateDates();
-            });
 
-            $('#endDate').on('change', function() {
-                const startDate = $('#startDate').val();
-                const endDate = $(this).val();
+                calculateRentalCost(differenceInDays);
+            }
 
-                if (startDate && endDate) {
-                    const start = new Date(startDate);
-                    const end = new Date(endDate);
-                    const minEndDate = new Date(start);
-                    minEndDate.setDate(start.getDate() + 2);
+            function checkButtonState() {
+                var startDate = $('#start_date').val();
+                var endDate = $('#end_date').val();
+                var startTime = $('#start').val();
+                var endTime = $('#end').val();
 
-                    if (end < minEndDate) {
-                        $('#endWarning').show();
-                        $(this).val('');
-                    } else {
-                        $('#endWarning').hide();
+                var isButtonEnabled = startDate && endDate && startTime && endTime;
+
+                // Проверяем, что даты не в прошлом и дата окончания больше даты начала
+                if (isButtonEnabled) {
+                    var today = new Date().setHours(0, 0, 0, 0);
+                    var selectedStartDate = new Date(startDate + 'T' + startTime);
+                    var selectedEndDate = new Date(endDate + 'T' + endTime);
+
+                    // Условие проверки
+                    if (selectedStartDate < today || selectedEndDate < today || selectedEndDate <= selectedStartDate) {
+                        isButtonEnabled = false;
                     }
                 }
-                validateDates();
+
+                $('#submitButton').prop('disabled', !isButtonEnabled);
+            }
+
+            $('#start').on('change', function() {
+                var startInput = $(this).val().split(':');
+                startInputHours = Number(startInput[0]) + 3; // Учитываем часовой пояс
+
+                $('#end_date').prop('disabled', false); // Активируем выбор даты возврата
+                checkButtonState();
             });
 
-            function validateDates() {
-                const startDate = $('#startDate').val();
-                const endDate = $('#endDate').val();
-                $('#confirmButton').prop('disabled', !(startDate && endDate));
-            }
+            $('#end').on('change', function() {
+                var endInput = $(this).val().split(':');
+                endInputHours = Number(endInput[0]);
+
+                calculate();
+                checkButtonState();
+            });
+
+            $('#start_date').on('change', function() {
+                var startDate = new Date($(this).val());
+                var nextDay = new Date(startDate);
+                nextDay.setDate(startDate.getDate() + 2);
+                $('#end_date').attr('min', nextDay.toISOString().split('T')[0]);
+                checkButtonState(); // Проверяем состояние кнопки
+            });
+
+            $('#end_date').on('change', function() {
+                $('#end').prop('disabled', false); // Активируем выбор времени возврата
+                checkButtonState(); // Проверяем состояние кнопки
+            });
+
+            // Дополнительные проверки при вводе даты
+            $('#start_date, #end_date').on('input', checkButtonState);
         });
+
+        function calculateRentalCost(days) {
+            // Логика расчета стоимости аренды
+            console.log("Количество дней аренды: " + days);
+        }
     </script>
 </body>
 </html>
